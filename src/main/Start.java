@@ -1,6 +1,8 @@
 package main;
 import java.awt.event.KeyEvent;
 
+import test1.Jwiki;
+
 public class Start implements Runnable{
 	
 	private Thread thread;
@@ -12,7 +14,6 @@ public class Start implements Runnable{
 	public static void main(String[] args) {
 		Start app=new Start();
 		app.start();
-		
 	}
 	
 	private void start() {

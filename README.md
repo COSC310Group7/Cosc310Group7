@@ -36,3 +36,15 @@ is -VBZ : be
 my -PRP$ : my
 food -NN : food
 ? -. : O
+
+## Individual Assignment (Joonsik Kim)
+
+I have implemented Translator and wikipedia into the bot.
+(Google Translate API, Wikipedia API)
+
+The AI now prompts the user with the language selection upon loading up the program.
+The user has a choice between english and french, the user can also simply ignore the message, as it will always work when needed by the user.
+
+The AI now prompts the user with the error message and notifies the user to use 'on wikipedia' at the end of their question in order to search in wikipedia.
+The user will be prompted back with the results from the wikipedia as a text message up to 170 letters.
+NOTE: ONLY WORKS IN ENGLISH.

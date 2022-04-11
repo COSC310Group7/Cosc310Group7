@@ -16,7 +16,7 @@ public class Frame {
 	 public Frame() {
 		 ai=new Ai();
 		 list=new Stack();
-		 list.addMessage(new Message("I am a AI designed to answer your questions.", 0));
+		 list.addMessage(new Message("I am a AI designed to answer your questions. Select your language: English translation or French translation", 0));
 	 }
 	 
 	 public Message[] getMessages() {

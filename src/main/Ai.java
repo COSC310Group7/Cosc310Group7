@@ -1,5 +1,6 @@
 package main;
 
+
 import java.io.*;
  
 import opennlp.tools.postag.POSModel;
@@ -7,9 +8,10 @@ import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
-
-import opennlp.tools.langdetect.*;
 import opennlp.tools.lemmatizer.DictionaryLemmatizer;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 public class Ai {
   	private String out;
@@ -17,6 +19,8 @@ public class Ai {
   	private String[] getTokenizer;
   	private String[] getPOStagger;
   	private String[] getLemmatizer;
+  	private int lang = 0;
+  	private boolean trans = false;
   	
   	//KEYWORDS
   	private String[] greetings={
@@ -88,6 +92,29 @@ public class Ai {
 		Input: input, A String that takes user input
 		Output: output, A String that takes
          */
+		
+		//This checks if the language has been selected or not.
+		if(!(trans)) {
+			if(input.contains("trans") || input.contains("lang")){
+				if(input.contains("en")){
+	              	out+=("English Selected");
+	              	lang = 0;              	
+				}else if(input.contains("fr")) {
+					out+=("French Selected");
+					lang = 1;
+				}
+			}
+		}
+		//Translating the French user input into English in order for the Translator to understand.
+		if(lang == 1) {
+			try {
+				input = translate("fr", "en", input);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		
+			
         	input=cleanInput(input);
        	out ="";     
         	boolean isOutput=false;
@@ -106,6 +133,18 @@ public class Ai {
             InputStream posModelIn = null;
              
             try {
+            	
+            	//
+//            	GeoApiContext context = new GeoApiContext.Builder()
+//            		    .apiKey("AIza...")
+//            		    .build();
+//            		GeocodingResult[] results =  GeocodingApi.geocode(context,"1600 Amphitheatre Parkway Mountain View, CA 94043").await();
+//            		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//            		System.out.println(gson.toJson(results[0].addressComponents));
+//
+//            		// Invoke .shutdown() after your application is done making requests
+//            		context.shutdown();
+            	
                 String sentence = input;
                 // tokenize the sentence
                 tokenModelIn = new FileInputStream("src/main/opennlp-en-ud-ewt-tokens-1.0-1.9.3.bin");
@@ -176,7 +215,15 @@ public class Ai {
         	
         	
         	
-  
+        if(input.contains("trans") || input.contains("lang")){
+			if(input.contains("en")){
+              	out+=("English Selected");
+              	isOutput=true;
+			}else if(input.contains("fr")) {
+				out+=("French Selected");
+				isOutput=true;
+			}
+		}
   		if(input.contains("where")){
   			// SkipTheDish
               	for(int i=0; i< food.length; i++){
@@ -360,6 +407,31 @@ public class Ai {
   			out+=" ";
   		}
   		
+  		if(input.contains("wiki")) {
+  			String temp = input;
+  			if(input.contains("what is") || input.contains("who are")){
+  				temp = temp.substring(8);
+  			}else if(input.contains("search") || input.contains("who is")){
+  				temp = temp.substring(7);
+  			}else if(input.contains("what are")) {
+  				temp = temp.substring(9);
+  			}
+  			if(input.contains("wikipedia")) {
+  				temp = temp.substring(0,temp.length() -13);
+  			}else {
+  				temp = temp.substring(0,temp.length() -8);
+  			}
+
+  			Jwiki.Jwiki jwiki = new Jwiki.Jwiki(temp); 
+  			String temp1 = jwiki.getExtractText();
+  			if(jwiki.getExtractText().length() > 170) {
+  				temp1 = jwiki.getExtractText().substring(0,170) + "...";
+  	  			System.out.println(temp1);
+  			}
+  			out+= jwiki.getDisplayTitle() + ", " + temp1;
+  			isOutput=true;
+  		}
+  		
   		// Outside bot focus
   		if(input.contains("sports") || input.contains("play")) {
           	out=("Sorry, I don't know much about sports.");
@@ -376,8 +448,17 @@ public class Ai {
   		}else if(input.isEmpty()){
             out="Please ask a question.";
         }else if(!isOutput){
-        	out="Sorry I don't understand your question.";
+        	out="Sorry I don't understand your question. You can ask a question by putting 'on wikipedia' at the end!";
         }
+  		
+  	//Translating bot's output into French for the user to understand.
+  		if(lang == 1) {
+  			try {
+  				out = translate("en", "fr", out);
+  			} catch (IOException e1) {
+  				e1.printStackTrace();
+  			}
+  		}
   		
 		return out;	
       }
@@ -398,6 +479,24 @@ public class Ai {
   	public String[] getLemmatization(){
   		return getLemmatizer;
   	}
+  	
+  	private static String translate(String langFrom, String langTo, String text) throws IOException {
+        String urlStr = "https://script.google.com/macros/s/AKfycbyl2YVijacbt1DgzOtg7Qo6iay7_qq0bkQewXkVTWSqA2PSGifltnay9Pu9pMeVMyMf2A/exec" +
+                "?q=" + URLEncoder.encode(text, "UTF-8") +
+                "&target=" + langTo +
+                "&source=" + langFrom;
+        URL url = new URL(urlStr);
+        StringBuilder response = new StringBuilder();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        return response.toString();
+    }
   	
   	
 
